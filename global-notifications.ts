@@ -345,7 +345,7 @@ export default function (pi: ExtensionAPI) {
             lines.push(borderedLine(w, `${styledLabel}${theme.fg("dim", time)}`, border));
           }
 
-          const hint = " ↑↓ navigate · d delete · x clear · esc close ";
+          const hint = " ↑↓ navigate · enter delete · x clear all · esc close ";
           lines.push(borderBottom(w, theme.fg("dim", hint), border));
           return lines;
         }
@@ -363,7 +363,7 @@ export default function (pi: ExtensionAPI) {
             } else if (matchesKey(data, Key.down) && selected < sorted.length - 1) {
               selected++;
               tui.requestRender();
-            } else if (data === "d" || matchesKey(data, Key.delete)) {
+            } else if (matchesKey(data, Key.enter) || matchesKey(data, Key.delete)) {
               done({ action: "delete", notification: sorted[selected]! });
             } else if (data === "x") {
               done({ action: "clear" });
@@ -393,7 +393,7 @@ export default function (pi: ExtensionAPI) {
 
     if (result.action === "clear") {
       const ok = await ctx.ui.confirm(
-        "Clear global notifications?",
+        "Clear all global notifications?",
         `Delete all ${notifications.length} global notifications?`,
       );
       if (!ok) return;
@@ -401,9 +401,9 @@ export default function (pi: ExtensionAPI) {
         notifications = clearNotifications().notifications;
         lastMtimeMs = currentStoreMtime();
         updateWidget();
-        ctx.ui.notify("Cleared global notifications", "info");
+        ctx.ui.notify("Cleared all global notifications", "info");
       } catch (error) {
-        ctx.ui.notify(`Failed to clear notifications: ${(error as Error).message}`, "error");
+        ctx.ui.notify(`Failed to clear all notifications: ${(error as Error).message}`, "error");
       }
     }
   }

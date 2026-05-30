@@ -57,7 +57,7 @@ Overlay keys:
 | Key | Action |
 | --- | --- |
 | `↑` / `↓` | Move selection |
-| `d` or `delete` | Delete selected notification globally |
+| `enter` or `delete` | Delete selected notification globally |
 | `x` | Clear all notifications globally after confirmation |
 | `esc` | Close overlay |
 
@@ -80,7 +80,7 @@ Use two Pi sessions with the extension loaded:
 1. In session A, ask the agent to call `notify_global` with a `title`.
 2. Confirm session B shows the global notification widget within about one second.
 3. Press `Alt+0` in session B and confirm the notification appears.
-4. Delete the notification in session B with `d` or `delete`.
+4. Delete the notification in session B with `enter` or `delete`.
 5. Confirm session A removes the notification widget within about one second.
 6. Add more than 100 notifications and confirm only the newest 100 remain in `~/.pi/global-notifications/notifications.json`.
 
