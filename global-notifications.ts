@@ -18,7 +18,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 
 interface GlobalNotification {
   id: string;
@@ -41,6 +41,7 @@ const STORE_DIR = join(homedir(), ".pi", "global-notifications");
 const STORE_PATH = join(STORE_DIR, "notifications.json");
 const MAX_NOTIFICATIONS = 100;
 const MAX_FIELD_CHARS = 100;
+const ALERT_PREFIX = "🚨 ";
 const POLL_INTERVAL_MS = 1000;
 
 function emptyStore(): NotificationStore {
@@ -62,6 +63,14 @@ function validateField(value: unknown, fieldName: string): string {
   return normalized;
 }
 
+function normalizeTitle(value: unknown): string {
+  const title = validateField(value, "title");
+  const withoutExistingPrefix = title.startsWith(ALERT_PREFIX)
+    ? title.slice(ALERT_PREFIX.length).trimStart()
+    : title;
+  return trimAndCap(`${ALERT_PREFIX}${withoutExistingPrefix}`);
+}
+
 function normalizeNotification(value: unknown): GlobalNotification | null {
   if (!value || typeof value !== "object") return null;
   const item = value as Partial<GlobalNotification>;
@@ -76,7 +85,7 @@ function normalizeNotification(value: unknown): GlobalNotification | null {
 
   return {
     id: item.id,
-    title: trimAndCap(item.title),
+    title: normalizeTitle(item.title),
     sessionName: trimAndCap(item.sessionName),
     timestamp: item.timestamp,
   };
@@ -152,7 +161,7 @@ function saveStore(store: NotificationStore): void {
 }
 
 function addNotification(titleValue: string, sessionNameValue: string): GlobalNotification {
-  const title = validateField(titleValue, "title");
+  const title = normalizeTitle(titleValue);
   const sessionName = validateField(sessionNameValue, "sessionName");
   const { store } = loadStore();
   const notification: GlobalNotification = {
@@ -198,6 +207,16 @@ function formatTime(timestamp: number): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function deriveSessionName(pi: ExtensionAPI, ctx: ExtensionContext): string {
+  const namedSession = pi.getSessionName()?.trim();
+  if (namedSession) return trimAndCap(namedSession);
+
+  const cwdName = basename(ctx.cwd).trim();
+  if (cwdName) return trimAndCap(cwdName);
+
+  return trimAndCap(ctx.sessionManager.getSessionId());
 }
 
 function borderedLine(
@@ -408,17 +427,25 @@ export default function (pi: ExtensionAPI) {
     description:
       "Create a simple title-only notification visible in all Pi sessions on this local machine.",
     promptSnippet:
-      "Create a simple global notification with a title and mandatory sessionName.",
+      "Create a simple global notification with a title; sessionName defaults to the current Pi session name.",
     promptGuidelines: [
       "Use notify_global when the user asks to notify other local Pi sessions or record a global notification.",
-      "notify_global requires a concise title and a mandatory sessionName; both are capped at 100 characters.",
+      "notify_global requires a concise title; the extension prefixes it with 🚨. sessionName is optional and defaults to the current Pi session name.",
     ],
     parameters: Type.Object({
-      title: Type.String({ description: "Notification title, maximum 100 characters." }),
-      sessionName: Type.String({ description: "Mandatory name of the Pi session creating the notification." }),
+      title: Type.String({ description: "Notification title. The extension prefixes it with 🚨 and caps it at 100 characters." }),
+      sessionName: Type.Optional(
+        Type.String({
+          description:
+            "Optional override for the Pi session name. Defaults to the current session name.",
+        }),
+      ),
     }),
-    async execute(_toolCallId, params) {
-      const notification = addNotification(params.title, params.sessionName);
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const sessionName = params.sessionName
+        ? validateField(params.sessionName, "sessionName")
+        : deriveSessionName(pi, ctx);
+      const notification = addNotification(params.title, sessionName);
       syncFromDisk(currentCtx);
       return {
         content: [

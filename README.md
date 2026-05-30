@@ -5,7 +5,7 @@ A Pi extension for simple notifications shared across all Pi sessions on the sam
 ## Features
 
 - **Global local store** — notifications are stored in `~/.pi/global-notifications/notifications.json`.
-- **Simple notification model** — each notification has only `title`, mandatory `sessionName`, `id`, and `timestamp`.
+- **Simple notification model** — each notification has only `title`, derived/optional `sessionName`, `id`, and `timestamp`.
 - **Title-only UI** — no levels, message bodies, actions, links, or per-session dismissals.
 - **Shared deletion** — deleting a notification removes it globally for every Pi session.
 - **Bounded history** — the newest 100 notifications are retained.
@@ -16,22 +16,23 @@ A Pi extension for simple notifications shared across all Pi sessions on the sam
 Agents can call:
 
 ```ts
-notify_global({ title, sessionName })
+notify_global({ title })
 ```
+
+`sessionName` can be provided as an override, but normally the extension derives it from the current Pi session name.
 
 Parameters:
 
 | Name | Required | Description |
 | --- | --- | --- |
-| `title` | yes | Notification title. Trimmed and capped at 100 characters. |
-| `sessionName` | yes | Name of the Pi session creating the notification. Trimmed and capped at 100 characters. |
+| `title` | yes | Notification title. Prefixed with `🚨 `, trimmed, and capped at 100 characters. |
+| `sessionName` | no | Optional override for the source label. Defaults to the current Pi session name; trimmed and capped at 100 characters. |
 
 Example:
 
 ```json
 {
-  "title": "Review worker finished",
-  "sessionName": "filmarchiv reviewer"
+  "title": "Review worker finished"
 }
 ```
 
@@ -76,7 +77,7 @@ Or install as a local Pi package by adding this path to your Pi settings/package
 
 Use two Pi sessions with the extension loaded:
 
-1. In session A, ask the agent to call `notify_global` with a `title` and `sessionName`.
+1. In session A, ask the agent to call `notify_global` with a `title`.
 2. Confirm session B shows the global notification widget within about one second.
 3. Press `Alt+0` in session B and confirm the notification appears.
 4. Delete the notification in session B with `d` or `delete`.
