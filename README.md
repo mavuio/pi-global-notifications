@@ -2,6 +2,13 @@
 
 A Pi extension for simple notifications shared across all Pi sessions on the same local machine.
 
+
+## Motivation
+
+I was constantly annoyed with the huge number of notification options I had. I mostly use Pi inside the Herdr multiplexer: in remote terminals, on my phone, on my tablet, and sometimes in remote desktop sessions. I can notify through Herdr, WezTerm, macOS, Telegram, and more. It is always a mess: sometimes notifications are muted, sometimes they are not.
+
+I wanted notifications to appear where I am constantly working: in my Pi agent. This extension is intentionally simple. Any Pi agent can write a title-only notification to a global notification stack. The notification is shown with the current session name and immediately appears in all other local Pi agents that have this extension enabled. Press `Alt+0` to open the panel and see all pending notifications; the latest notification is shown in the widget by default.
+
 ## Features
 
 - **Global local store** — notifications are stored in `~/.pi/global-notifications/notifications.json`.
@@ -60,6 +67,12 @@ Overlay keys:
 | `enter` or `delete` | Delete selected notification globally |
 | `x` | Clear all notifications globally after confirmation |
 | `esc` | Close overlay |
+
+## Install
+
+```bash
+pi install npm:pi-global-notifications
+```
 
 ## Try locally
 

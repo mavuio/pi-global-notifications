@@ -1,14 +1,24 @@
 {
   "name": "pi-global-notifications",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Pi extension: simple global notifications shared across local Pi sessions",
   "keywords": [
-    "pi-package"
+    "pi-package",
+    "pi",
+    "pi-coding-agent",
+    "extension",
+    "notifications"
   ],
+  "license": "MIT",
+  "author": "Manfred Wuits",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mavuio/pi-global-notifications"
+  },
+  "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
-  "license": "MIT",
   "devDependencies": {
     "@types/node": "latest",
     "typescript": "latest"
