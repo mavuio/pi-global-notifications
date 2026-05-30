@@ -1,0 +1,101 @@
+# pi-global-notifications
+
+A Pi extension for simple notifications shared across all Pi sessions on the same local machine.
+
+## Features
+
+- **Global local store** — notifications are stored in `~/.pi/global-notifications/notifications.json`.
+- **Simple notification model** — each notification has only `title`, mandatory `sessionName`, `id`, and `timestamp`.
+- **Title-only UI** — no levels, message bodies, actions, links, or per-session dismissals.
+- **Shared deletion** — deleting a notification removes it globally for every Pi session.
+- **Bounded history** — the newest 100 notifications are retained.
+- **Live-ish refresh** — sessions poll the store mtime about once per second and update their widget when another session writes or deletes notifications.
+
+## Tool
+
+Agents can call:
+
+```ts
+notify_global({ title, sessionName })
+```
+
+Parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `title` | yes | Notification title. Trimmed and capped at 100 characters. |
+| `sessionName` | yes | Name of the Pi session creating the notification. Trimmed and capped at 100 characters. |
+
+Example:
+
+```json
+{
+  "title": "Review worker finished",
+  "sessionName": "filmarchiv reviewer"
+}
+```
+
+## UI
+
+When notifications exist, Pi shows a compact widget above the editor with:
+
+- total notification count
+- newest notification as `sessionName — title`
+- timestamp
+- `alt+0 open` hint
+
+Open the notification pane with:
+
+| Shortcut / command | Action |
+| --- | --- |
+| `Alt+0` | Open global notifications overlay |
+| `/notifications` | Open global notifications overlay |
+
+Overlay keys:
+
+| Key | Action |
+| --- | --- |
+| `↑` / `↓` | Move selection |
+| `d` or `delete` | Delete selected notification globally |
+| `x` | Clear all notifications globally after confirmation |
+| `esc` | Close overlay |
+
+## Try locally
+
+From this repository:
+
+```bash
+npm install
+npm run typecheck
+pi -e /Users/manfred/mavu-macbook/clones/pi-global-notifications
+```
+
+Or install as a local Pi package by adding this path to your Pi settings/packages.
+
+## Manual smoke test
+
+Use two Pi sessions with the extension loaded:
+
+1. In session A, ask the agent to call `notify_global` with a `title` and `sessionName`.
+2. Confirm session B shows the global notification widget within about one second.
+3. Press `Alt+0` in session B and confirm the notification appears.
+4. Delete the notification in session B with `d` or `delete`.
+5. Confirm session A removes the notification widget within about one second.
+6. Add more than 100 notifications and confirm only the newest 100 remain in `~/.pi/global-notifications/notifications.json`.
+
+## Scope
+
+Version 1 intentionally does not include:
+
+- severity levels
+- message bodies
+- notification actions or links
+- per-session dismissal
+- external CLI writer
+- daemon process
+- SQLite storage
+- cross-machine sync
+
+## License
+
+MIT
